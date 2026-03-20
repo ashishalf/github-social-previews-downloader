@@ -5,6 +5,7 @@ import Header from './components/Header';
 import RepoInput from './components/RepoInput';
 import PreviewCard from './components/PreviewCard';
 import TrendingRepos from './components/TrendingRepos';
+import { Analytics } from "@vercel/analytics/react";
 
 // Utilities
 import { parseGithubUrl } from './utils/parseGithubUrl';
@@ -162,6 +163,7 @@ function App() {
           </p>
         </div>
       </footer>
+     <Analytics />
     </div>
   );
 }
