@@ -5,6 +5,8 @@ import Header from './components/Header';
 import RepoInput from './components/RepoInput';
 import PreviewCard from './components/PreviewCard';
 import TrendingRepos from './components/TrendingRepos';
+import CustomImageGenerator from './components/CustomImageGenerator';
+
 import { Analytics } from "@vercel/analytics/react";
 
 // Utilities
@@ -142,6 +144,14 @@ function App() {
           loading={previewData.loading}
           error={previewData.error}
         />
+
+        {/* ✅ Custom Image Generator */}
+        {previewData.imageUrl && !previewData.loading && (
+          <CustomImageGenerator
+            owner={previewData.owner}
+            repo={previewData.repo}
+          />
+        )}
 
         {/* Trending repos section */}
         <TrendingRepos onSelect={handleTrendingSelect} />
