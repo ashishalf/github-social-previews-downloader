@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📸 GitHub Social Previews Downloader
+# 📸 GitHub Repo Social Previews Downloader
 
 **Download GitHub repository social preview (Open Graph) images instantly.**
 
