@@ -118,9 +118,9 @@ function App() {
         {/* Hero section */}
         <div className="text-center mb-10">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-            Download GitHub
+            Generate GitHub
             <br className="hidden sm:block" />
-            <span className="text-ghAccent"> Social Previews</span>
+            <span className="text-ghAccent"> Social Images</span>
           </h2>
           <p className="text-ghMuted text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
             Paste any GitHub repository URL to instantly preview and download
