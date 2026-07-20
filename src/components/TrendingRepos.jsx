@@ -58,15 +58,17 @@ export default function TrendingRepos({ onSelect }) {
       const data = await response.json();
 
       if (data?.data?.rows && data.data.rows.length > 0) {
-        const formatted = data.data.rows.map((item) => {
-          const [owner, repo] = item.repo_name.split('/');
-          return {
-            owner,
-            repo,
-            description: item.description || '',
-            stars: Number(item.stars) || 0,
-          };
-        });
+        const formatted = data.data.rows
+          .slice(0, 20)
+          .map((item) => {
+            const [owner, repo] = item.repo_name.split('/');
+            return {
+              owner,
+              repo,
+              description: item.description || '',
+              stars: Number(item.stars) || 0,
+            };
+          });
         setRepos(formatted);
       } else {
         throw new Error('No trending repos returned');
