@@ -1,13 +1,13 @@
 <div align="center">
 
-# 📸 GitHub Repo Social Previews Downloader
+# 📸 GitHub Social Image Generator
 
-**Download GitHub repository social preview (Open Graph) images instantly.**
+**Generate & download GitHub repository social preview (Open Graph) images instantly.**
 
-Paste any GitHub repo URL → Preview the OG image → Download it directly.
+Paste any GitHub repo URL → Preview the OG image → Download it directly or Generate Custom
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-58a6ff?style=for-the-badge)](https://github-social-previews-downloader.vercel.app/)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-161b22?style=for-the-badge&logo=github)](https://github.com/ashishalf/github-social-preview-downloader)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-58a6ff?style=for-the-badge)](https://github-social-images-generator.vercel.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-161b22?style=for-the-badge&logo=github)](https://github.com/heyashishsaini/github-social-image-generator)
 [![License](https://img.shields.io/badge/License-MIT-238636?style=for-the-badge)](LICENSE)
 
 </div>
@@ -20,43 +20,59 @@ Paste any GitHub repo URL → Preview the OG image → Download it directly.
 - 🖼️ **Smart Detection** — 3-step cascading logic to find the best preview image
 - ⬇️ **Direct Download** — Download image directly as PNG without opening new tabs
 - 📋 **Copy URL** — One-click copy image URL to clipboard
-- 🔥 **Trending Repos** — Browse top trending GitHub repositories as clickable examples
+- 🎨 **Custom Image Generator** — Create your own custom social preview images with personalized text, colors, and layout
+- 🔥 **Trending Repos** — Browse real-time trending GitHub repositories (powered by OSS Insight API) as clickable examples
 - 🌙 **GitHub Dark Theme** — Beautiful dark UI inspired by GitHub's design
 - 📱 **Fully Responsive** — Works perfectly on mobile, tablet and desktop
-- ⚡ **Fast & Lightweight** — Built with Vite for blazing fast performance
+- ⚡ **Fast & Lightweight** — Built with Vite 8 for blazing fast performance
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| **React 18** | UI library with functional components & hooks |
-| **Vite** | Build tool for fast development |
-| **TailwindCSS 3** | Utility-first CSS framework |
-| **Vercel Analytics** | Website analytics |
-| **Fetch API** | HTTP requests |
+| Technology | Version | Purpose |
+|---|---|---|
+| **React** | 19 | UI library with functional components & hooks |
+| **Vite** | 8 | Build tool for fast development |
+| **TailwindCSS** | 3.4 | Utility-first CSS framework |
+| **html-to-image** | 1.11 | Custom social preview image generation |
+| **Vercel Analytics** | 2.0 | Website analytics |
+| **OSS Insight API** | — | Real-time trending repositories data |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-src/
-├── components/
-│   ├── Header.jsx          # Top navigation bar
-│   ├── RepoInput.jsx       # URL input form with validation
-│   ├── PreviewCard.jsx     # Image preview + download/copy buttons
-│   ├── TrendingRepos.jsx   # Trending repos section
-│   └── RepoCard.jsx        # Individual repo card component
+github-social-image-generator/
+├── public/                          # Static assets
+├── src/
+│   ├── assets/                      # Images, icons & static resources
+│   ├── components/
+│   │   ├── Header.jsx               # Top navigation bar
+│   │   ├── RepoInput.jsx            # URL input form with validation
+│   │   ├── PreviewCard.jsx          # Image preview + download/copy buttons
+│   │   ├── TrendingRepos.jsx        # Trending repos section (OSS Insight API)
+│   │   ├── RepoCard.jsx             # Individual repo card component
+│   │   └── CustomImageGenerator.jsx # Custom OG image generator
+│   │
+│   ├── utils/
+│   │   ├── parseGithubUrl.js        # URL parser utility
+│   │   ├── getPreviewImage.js       # 3-condition image detection logic
+│   │   └── fetchRepoData.js         # Fetches repo metadata from GitHub API
+│   │
+│   ├── App.jsx                      # Root component
+│   ├── main.jsx                     # Entry point
+│   ├── App.css                      # App-level styles
+│   └── index.css                    # Global styles + Tailwind imports
 │
-├── utils/
-│   ├── parseGithubUrl.js   # URL parser utility
-│   └── getPreviewImage.js  # 3-condition image detection logic
-│
-├── App.jsx                 # Root component
-├── main.jsx                # Entry point
-└── index.css               # Global styles + Tailwind imports
+├── index.html                       # HTML entry point
+├── vite.config.js                   # Vite configuration
+├── tailwind.config.js               # TailwindCSS configuration
+├── postcss.config.js                # PostCSS configuration
+├── eslint.config.js                 # ESLint configuration
+├── package.json                     # Dependencies & scripts
+└── README.md                        # Project documentation
 ```
 
 ---
@@ -78,17 +94,17 @@ All are parsed to extract `owner` and `repo`.
 
 ### 3-Condition Image Detection
 
-The app uses a cascading detection strategy:
+The app uses a cascading detection strategy to find the best preview image:
 
 ```
 Condition 1 → Auto-generated OG Image
               https://opengraph.githubassets.com/1/{owner}/{repo}
-              
+
               ↓ If fails
 
 Condition 2 → Custom Social Preview
               Fetch repo HTML → Parse og:image meta tag
-              
+
               ↓ If fails
 
 Condition 3 → No Preview Available
@@ -103,9 +119,30 @@ Direct download with 3 fallback methods:
 Method 1 → Canvas API (draw image → create blob → download)
     ↓ If fails
 Method 2 → CORS Proxy fetch (try multiple proxies)
-    ↓ If fails  
+    ↓ If fails
 Method 3 → Direct link download (last resort)
 ```
+
+### Custom Image Generation
+
+Users can create custom social preview images using the `CustomImageGenerator` component:
+
+- Add custom title, description, and branding text
+- Choose colors and layout
+- Preview in real-time
+- Export as PNG using `html-to-image` library
+
+### Trending Repositories
+
+Trending repos are fetched from the **OSS Insight API** (`api.ossinsight.io`):
+
+```
+GET https://api.ossinsight.io/v1/trends/repos/?period=past_24_hours&language=All
+```
+
+- Returns top 20 repos trending in the past 24 hours
+- Fully client-side — no backend required
+- Falls back to a hardcoded popular repos list if API fails
 
 ---
 
@@ -145,9 +182,10 @@ GitHub-inspired dark theme color palette:
 | Trailing slash | `https://github.com/vuejs/vue/` | Parsed correctly |
 | Invalid URL | `hello world` | Error message shown |
 | Non-existent repo | `abcxyz123/norepo999` | "No preview available" |
-| Trending click | Click any card | Auto-fills input + loads preview |
+| Trending click | Click any trending card | Auto-fills input + loads preview |
 | Download | Click download button | File saves as `repo-social-preview.png` |
 | Copy URL | Click copy button | URL copied + "Copied!" shown |
+| Custom image | Use custom generator tab | Creates and downloads custom PNG |
 
 ---
 
@@ -157,33 +195,37 @@ Contributions are welcome! Here's how:
 
 ```bash
 # 1. Fork the repository
+# 2. Clone your fork
+git clone https://github.com/your-username/github-social-image-generator.git
 
-# 2. Create a feature branch
+# 3. Create a feature branch
 git checkout -b feature/amazing-feature
 
-# 3. Make your changes and commit
+# 4. Make your changes and commit
 git commit -m "Add amazing feature"
 
-# 4. Push to your branch
+# 5. Push to your branch
 git push origin feature/amazing-feature
 
-# 5. Open a Pull Request
+# 6. Open a Pull Request
 ```
 
 ### Contribution Ideas
 
 - [ ] Add support for GitLab / Bitbucket repositories
-- [ ] Add image dimension display
+- [ ] Add image dimension display and resize options
 - [ ] Add batch download for multiple repos
 - [ ] Add download history with local storage
-- [ ] Add share preview on social media
+- [ ] Add share preview directly to social media
 - [ ] Add dark/light theme toggle
+- [ ] Add more custom image templates
+- [ ] Add language filter for trending repos
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
 ```
 MIT License
@@ -213,16 +255,18 @@ SOFTWARE.
 
 ## 🙏 Acknowledgments
 
-- [GitHub](https://github.com) — For the Open Graph image system
-- [TailwindCSS](https://tailwindcss.com) — For the utility-first CSS framework
-- [Vite](https://vitejs.dev) — For the blazing fast build tool
-- [Vercel](https://vercel.com) — For hosting and analytics
+- [GitHub](https://github.com/) — For the Open Graph image system
+- [OSS Insight](https://ossinsight.io/) — For the trending repositories API
+- [TailwindCSS](https://tailwindcss.com/) — For the utility-first CSS framework
+- [Vite](https://vitejs.dev/) — For the blazing fast build tool
+- [html-to-image](https://github.com/bubkoo/html-to-image) — For custom image generation
+- [Vercel](https://vercel.com/) — For hosting and analytics
 
 ---
 
 <div align="center">
 
-**Made With ❤️ By [Ashish Kumar](https://github.com/ashishalf)**
+**Made with ❤️ by [Ashish Kumar](https://github.com/heyashishsaini)**
 
 ⭐ Star this repo if you found it useful!
 
