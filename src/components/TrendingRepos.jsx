@@ -4,9 +4,9 @@ import RepoCard from './RepoCard';
 /**
  * TrendingRepos.jsx
  *
- * Fetches and displays trending/popular GitHub repositories.
- * Uses the GitHub Search API to find top-starred repositories.
- * Falls back to a hardcoded list if the API call fails (rate limiting, etc.).
+ * Fetches and displays trending GitHub repositories.
+ * Uses the OSS Insight API (https://api.ossinsight.io) to get real trending repos.
+ * Falls back to a hardcoded list if the API call fails.
  *
  * Props:
  *   - onSelect(repoString): callback when a user clicks a repo card
@@ -36,37 +36,40 @@ export default function TrendingRepos({ onSelect }) {
   }, []);
 
   /**
-   * Fetch trending repositories from GitHub Search API.
-   * Searches for repos with >50k stars, sorted by stars descending.
+   * Fetch trending repositories from OSS Insight API.
+   * Returns repos trending in the past 24 hours across all languages.
    * Falls back to hardcoded list on failure.
    */
   const fetchTrendingRepos = async () => {
     try {
       const response = await fetch(
-        'https://api.github.com/search/repositories?q=stars:>50000&sort=stars&order=desc&per_page=10',
+        'https://api.ossinsight.io/v1/trends/repos/?period=past_24_hours&language=All',
         {
           headers: {
-            Accept: 'application/vnd.github.v3+json',
+            Accept: 'application/json',
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error(`GitHub API responded with ${response.status}`);
+        throw new Error(`API responded with ${response.status}`);
       }
 
       const data = await response.json();
 
-      if (data.items && data.items.length > 0) {
-        const formatted = data.items.map((item) => ({
-          owner: item.owner.login,
-          repo: item.name,
-          description: item.description || '',
-          stars: item.stargazers_count,
-        }));
+      if (data?.data?.rows && data.data.rows.length > 0) {
+        const formatted = data.data.rows.map((item) => {
+          const [owner, repo] = item.repo_name.split('/');
+          return {
+            owner,
+            repo,
+            description: item.description || '',
+            stars: Number(item.stars) || 0,
+          };
+        });
         setRepos(formatted);
       } else {
-        throw new Error('No items returned');
+        throw new Error('No trending repos returned');
       }
     } catch (error) {
       console.warn('Failed to fetch trending repos, using fallback list:', error.message);
