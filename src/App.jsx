@@ -163,7 +163,7 @@ function App() {
           <p className="text-ghMuted text-sm">
             Made With ❤️ By{' '}
             <a
-              href="https://github.com/ashishalf"
+              href="https://github.com/heyashishsaini"
               target="_blank"
               rel="noopener noreferrer"
               className="text-ghAccent hover:underline font-semibold"
