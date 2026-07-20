@@ -7,6 +7,7 @@ import { fetchRepoData, formatNumber } from '../utils/fetchRepoData';
  *
  * Bannerbear jaisa professional social preview generator
  * 4 distinct layouts + contributor avatars + real GitHub data
+ * PreviewCard jaisa centered & responsive
  */
 
 const LANG_COLORS = {
@@ -25,11 +26,28 @@ export default function CustomImageGenerator({ owner, repo }) {
   const [repoData, setRepoData] = useState(null);
   const [dataLoading, setDataLoading] = useState(false);
   const [customDesc, setCustomDesc] = useState('');
+  const [previewScale, setPreviewScale] = useState(0.5);
   const templateRef = useRef(null);
+  const previewWrapperRef = useRef(null);
 
   useEffect(() => {
     if (owner && repo) loadData();
   }, [owner, repo]);
+
+  // ─ Dynamic scale: preview ko container ke hisaab se resize karo ──
+  useEffect(() => {
+    const updateScale = () => {
+      if (previewWrapperRef.current) {
+        const containerWidth = previewWrapperRef.current.offsetWidth;
+        // 1280px content ko fit karo, max scale 0.5 (640px), min scale 0.25
+        const scale = Math.min(containerWidth / 1280, 0.5);
+        setPreviewScale(Math.max(scale, 0.25));
+      }
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, [showForm]);
 
   const loadData = async () => {
     setDataLoading(true);
@@ -48,21 +66,20 @@ export default function CustomImageGenerator({ owner, repo }) {
       const el = templateRef.current;
       const parent = el.parentElement;
 
-      // ── Step 1: Save original styles ──
+      // ─ Step 1: Save original styles ──
       const origTransform = el.style.transform;
       const origOrigin = el.style.transformOrigin;
       const origParentW = parent.style.width;
       const origParentH = parent.style.height;
       const origParentOverflow = parent.style.overflow;
 
-      // ── Step 2: Remove scale → full size for capture ──
+      // ── Step 2: Remove scale → full size for capture ─
       el.style.transform = 'none';
       el.style.transformOrigin = 'unset';
       parent.style.width = '1280px';
       parent.style.height = '640px';
       parent.style.overflow = 'visible';
 
-      // Small delay taaki DOM update ho jaaye
       await new Promise((r) => setTimeout(r, 100));
 
       // ── Step 3: Capture at FULL 1280x640 ──
@@ -94,17 +111,10 @@ export default function CustomImageGenerator({ owner, repo }) {
       document.body.removeChild(link);
     } catch (err) {
       console.error('Generation failed:', err);
-      // Restore on error too
       const el = templateRef.current;
       if (el) {
-        el.style.transform = 'scale(0.5)';
+        el.style.transform = `scale(${previewScale})`;
         el.style.transformOrigin = 'top left';
-        const parent = el.parentElement;
-        if (parent) {
-          parent.style.width = '640px';
-          parent.style.height = '320px';
-          parent.style.overflow = 'hidden';
-        }
       }
     } finally {
       setGenerating(false);
@@ -188,27 +198,30 @@ export default function CustomImageGenerator({ owner, repo }) {
                   </div>
                 </div>
 
-                {/* ══ LIVE PREVIEW — Centered & Responsive ══ */}
+                {/* ══ LIVE PREVIEW — PreviewCard jaisa centered & responsive ══ */}
                 <div className="mb-6">
                   <label className="block text-ghMuted text-sm mb-3 text-center">Live Preview:</label>
-                  <div className="flex justify-center">
-                    <div
-                      className="rounded-lg overflow-hidden border-2 border-ghBorder bg-ghBg"
-                      style={{ maxWidth: '100%' }}
-                    >
-                      {/* Scrollable on small screens, centered on large */}
-                      <div className="overflow-x-auto flex justify-center">
-                        <div style={{ width: '640px', height: '320px', overflow: 'hidden', flexShrink: 0 }}>
-                          <div
-                            ref={templateRef}
-                            style={{
-                              width: '1280px',
-                              height: '640px',
-                              transform: 'scale(0.5)',
-                              transformOrigin: 'top left',
-                              overflow: 'hidden',
-                            }}
-                          >
+
+                  {/* PreviewCard-style container */}
+                  <div className="bg-ghCard border border-ghBorder rounded-lg overflow-hidden">
+                    {/* Image area — aspect ratio 2:1, responsive */}
+                    <div className="p-4 sm:p-6">
+                      <div
+                        ref={previewWrapperRef}
+                        className="w-full rounded-lg overflow-hidden border border-ghBorder bg-ghBg"
+                        style={{ aspectRatio: '2 / 1' }}
+                      >
+                        {/* Scaled content — dynamically scaled to fit */}
+                        <div
+                          style={{
+                            width: '1280px',
+                            height: '640px',
+                            transform: `scale(${previewScale})`,
+                            transformOrigin: 'top left',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <div ref={templateRef}>
                             {layout === 'github' && (
                               <LayoutGithub owner={owner} repo={repo} data={repoData} desc={desc} />
                             )}
@@ -225,39 +238,37 @@ export default function CustomImageGenerator({ owner, repo }) {
                         </div>
                       </div>
                     </div>
+
+                    {/* Download button — PreviewCard style */}
+                    <div className="px-4 sm:px-6 py-4 border-t border-ghBorder">
+                      <button
+                        onClick={handleGenerate}
+                        disabled={generating}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5
+                                   bg-ghGreen hover:bg-ghGreenHover disabled:opacity-50
+                                   disabled:cursor-not-allowed text-white font-semibold rounded-lg
+                                   transition-colors duration-200"
+                      >
+                        {generating ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                            Generating HD Image...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download Custom Preview (1280×640 HD)
+                          </>
+                        )}
+                      </button>
+                      <p className="text-ghMuted text-xs text-center mt-2">
+                        Perfect for Twitter, LinkedIn, Facebook, Discord & README
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-ghMuted text-xs text-center mt-2">
-                    ← Scroll horizontally on small screens →
-                  </p>
                 </div>
-
-                {/* Download */}
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3.5
-                             bg-ghGreen hover:bg-ghGreenHover disabled:opacity-50
-                             disabled:cursor-not-allowed text-white font-bold rounded-lg
-                             transition-colors text-sm sm:text-base"
-                >
-                  {generating ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                      Generating HD Image...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Download Custom Preview (1280×640 HD)
-                    </>
-                  )}
-                </button>
-
-                <p className="text-ghMuted text-xs text-center mt-2">
-                  Perfect for Twitter, LinkedIn, Facebook, Discord & README
-                </p>
               </>
             )}
           </div>
@@ -269,7 +280,7 @@ export default function CustomImageGenerator({ owner, repo }) {
 
 // ═══════════════════════════════════════════════════════════
 // LAYOUT 1: GITHUB CLASSIC — Light header + clean design
-// ═══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function LayoutGithub({ owner, repo, data, desc }) {
   return (
     <div style={{
