@@ -7,7 +7,7 @@
 Paste any GitHub repo URL → Preview the OG image → Download it directly or Generate Custom
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-58a6ff?style=for-the-badge)](https://github-social-images-generator.vercel.app/)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-161b22?style=for-the-badge&logo=github)](https://github.com/heyashishsaini/github-social-image-generator)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-161b22?style=for-the-badge&logo=github)](https://github.com/heyashishsaini/github-social-images-generator)
 [![License](https://img.shields.io/badge/License-MIT-238636?style=for-the-badge)](LICENSE)
 
 </div>
@@ -44,7 +44,7 @@ Paste any GitHub repo URL → Preview the OG image → Download it directly or G
 ## 📁 Project Structure
 
 ```
-github-social-image-generator/
+github-social-images-generator/
 ├── public/                          # Static assets
 ├── src/
 │   ├── assets/                      # Images, icons & static resources
@@ -196,7 +196,7 @@ Contributions are welcome! Here's how:
 ```bash
 # 1. Fork the repository
 # 2. Clone your fork
-git clone https://github.com/your-username/github-social-image-generator.git
+git clone https://github.com/your-username/github-social-images-generator.git
 
 # 3. Create a feature branch
 git checkout -b feature/amazing-feature
